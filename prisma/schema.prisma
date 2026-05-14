@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Competitor {
+  id        String   @id @default(cuid())
+  name      String
+  website   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reports Report[]
+  sources Source[]
+
+  @@index([createdAt])
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  title       String
+  summary     String
+  fullReport  String
+  sentToSlack Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  competitorId String?
+  competitor   Competitor? @relation(fields: [competitorId], references: [id])
+
+  sources Source[]
+
+  @@index([competitorId])
+  @@index([createdAt])
+}
+
+model Source {
+  id          String    @id @default(cuid())
+  title       String
+  url         String
+  snippet     String?
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  competitorId String?
+  competitor   Competitor? @relation(fields: [competitorId], references: [id])
+
+  reportId String?
+  report   Report? @relation(fields: [reportId], references: [id])
+
+  @@index([competitorId])
+  @@index([reportId])
+  @@index([createdAt])
+}
+
+model AnalysisRun {
+  id                 String    @id @default(cuid())
+  status             String
+  triggeredBy        String?
+  startedAt          DateTime  @default(now())
+  finishedAt         DateTime?
+  error              String?
+  competitorsScanned Int       @default(0)
+  reportsCreated     Int       @default(0)
+  durationMs         Int?
+
+  @@index([status])
+  @@index([startedAt])
+}
