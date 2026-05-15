@@ -28,7 +28,7 @@ export default async function HomePage() {
         </h1>
         <p className="max-w-2xl text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
           Add competitors, run an on-demand scan, or rely on the daily cron job. Each run
-          searches public updates, drafts a concise report with an LLM, saves sources,
+          searches public updates, drafts a concise report with an LLM, saves search results,
           and posts summaries to Slack.
         </p>
         <div className="flex flex-wrap gap-3 text-sm text-zinc-700 dark:text-zinc-300">

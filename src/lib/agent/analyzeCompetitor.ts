@@ -5,14 +5,14 @@ import { generateCompetitorReport } from "@/lib/llm/generateCompetitorReport";
 import { searchMarketUpdates } from "@/lib/search/searchMarketUpdates";
 
 export async function analyzeCompetitor(competitor: Competitor) {
-  const sources = await searchMarketUpdates({
+  const webSearchResults = await searchMarketUpdates({
     name: competitor.name,
     website: competitor.website,
   });
 
   const generated = await generateCompetitorReport({
     competitorName: competitor.name,
-    sources,
+    webSearchResults,
   });
 
   const report = await prisma.report.create({
@@ -21,19 +21,20 @@ export async function analyzeCompetitor(competitor: Competitor) {
       title: generated.title,
       summary: generated.summary,
       fullReport: generated.fullReport,
-      sources: {
-        create: sources.map((source) => ({
+      searchResults: {
+        create: webSearchResults.map((hit) => ({
           competitorId: competitor.id,
-          title: source.title,
-          url: source.url,
-          snippet: source.snippet,
-          publishedAt: source.publishedAt ?? undefined,
+          title: hit.title,
+          url: hit.url,
+          snippet: hit.snippet,
+          publishedAt: hit.publishedAt ?? undefined,
+          score: hit.score ?? undefined,
         })),
       },
     },
     include: {
       competitor: true,
-      sources: true,
+      searchResults: true,
     },
   });
 

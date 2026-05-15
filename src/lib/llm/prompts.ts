@@ -1,8 +1,8 @@
-import { SearchResult } from "@/lib/search/types";
+import { WebSearchResult } from "@/lib/search/types";
 
 export function buildCompetitorReportPrompt(
   competitorName: string,
-  sources: SearchResult[],
+  webSearchResults: WebSearchResult[],
 ) {
   return `
 You are an analyst preparing a concise competitor update report.
@@ -10,13 +10,13 @@ You are an analyst preparing a concise competitor update report.
 Competitor:
 ${competitorName}
 
-Sources:
-${sources
+SearchResults:
+${webSearchResults
   .map(
-    (source, index) => `
-${index + 1}. ${source.title}
-URL: ${source.url}
-Snippet: ${source.snippet || "No snippet"}
+    (hit, index) => `
+${index + 1}. ${hit.title}
+URL: ${hit.url}
+Snippet: ${hit.snippet || "No snippet"}
 `,
   )
   .join("\n")}

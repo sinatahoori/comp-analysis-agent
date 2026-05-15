@@ -29,7 +29,7 @@ describe("formatSlackMessage", () => {
     delete process.env.VERCEL_URL;
   });
 
-  it("includes title, full summary, truncated detail when fullReport is longer, and dashboard link", () => {
+  it("puts the dashboard link before the long preview, and keeps line breaks in the preview", () => {
     process.env.APP_BASE_URL = "https://app.example.com";
 
     const msg = formatSlackMessage([baseReport]);
@@ -37,8 +37,16 @@ describe("formatSlackMessage", () => {
     expect(msg).toContain("*Acme*");
     expect(msg).toContain("_Competitor update: Acme_");
     expect(msg).toContain(baseReport.summary);
-    expect(msg).toContain("More detail");
+    expect(msg).toContain("Extra detail below");
     expect(msg).toContain("<https://app.example.com/reports/rep_1|Open full report in dashboard>");
+
+    const linkAt = msg.indexOf("Open full report in dashboard");
+    const previewAt = msg.indexOf("Extra detail below");
+    expect(linkAt).toBeGreaterThan(-1);
+    expect(previewAt).toBeGreaterThan(linkAt);
+
+    // Preview must not squash the second paragraph into one line
+    expect(msg).toContain("\nAdditional narrative");
   });
 
   it("omits link when no base URL is configured", () => {
@@ -46,5 +54,26 @@ describe("formatSlackMessage", () => {
 
     expect(msg).not.toContain("Open full report");
     expect(msg).toContain(baseReport.summary);
+  });
+
+  it("turns markdown headings into Slack bold so # does not show in the preview", () => {
+    const report = {
+      ...baseReport,
+      id: "rep_2",
+      summary: "Short.",
+      fullReport:
+        "Short.\n\n" +
+        "### Key Updates\n\n" +
+        "- **One**: item\n" +
+        "- [Example](https://example.com/page)\n\n" +
+        "Extra padding ".repeat(100),
+    };
+
+    const msg = formatSlackMessage([report]);
+
+    expect(msg).toContain("*Key Updates*");
+    expect(msg).not.toContain("###");
+    expect(msg).toMatch(/\*One\*: item/);
+    expect(msg).toContain("<https://example.com/page|Example>");
   });
 });

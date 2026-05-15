@@ -7,7 +7,7 @@ export async function GET() {
     orderBy: { createdAt: "desc" },
     include: {
       competitor: true,
-      sources: true,
+      searchResults: true,
     },
   });
 

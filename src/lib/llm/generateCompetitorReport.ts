@@ -1,13 +1,13 @@
 import OpenAI from "openai";
 
 import { getOptionalEnv } from "@/lib/env";
-import { SearchResult } from "@/lib/search/types";
+import { WebSearchResult } from "@/lib/search/types";
 
 import { buildCompetitorReportPrompt } from "./prompts";
 
 type GenerateReportInput = {
   competitorName: string;
-  sources: SearchResult[];
+  webSearchResults: WebSearchResult[];
 };
 
 type GeneratedReport = {
@@ -17,8 +17,8 @@ type GeneratedReport = {
 };
 
 function mockReport(input: GenerateReportInput): GeneratedReport {
-  const sourceSummary = input.sources
-    .map((source) => `- ${source.title}: ${source.snippet || source.url}`)
+  const webSearchSummary = input.webSearchResults
+    .map((hit) => `- ${hit.title}: ${hit.snippet || hit.url}`)
     .join("\n");
 
   return {
@@ -29,7 +29,7 @@ function mockReport(input: GenerateReportInput): GeneratedReport {
 
 ### Key Findings
 
-${sourceSummary}
+${webSearchSummary}
 
 ### Potential Impact
 
@@ -52,7 +52,7 @@ export async function generateCompetitorReport(
   }
 
   const client = new OpenAI({ apiKey  , baseURL  }  );
-  const userPrompt = `${buildCompetitorReportPrompt(input.competitorName, input.sources)}
+  const userPrompt = `${buildCompetitorReportPrompt(input.competitorName, input.webSearchResults)}
 
 Return ONLY valid JSON with this shape (no markdown fences):
 {"title":"string","summary":"string","fullReport":"string"}

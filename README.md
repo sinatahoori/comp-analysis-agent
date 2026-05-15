@@ -2,7 +2,7 @@
 
 ## Overview
 
-Proof-of-concept **Competitor Analysis Agent**: maintain a list of competitors, pull recent **public** web/news-style updates via a search API, summarize them with an LLM, persist structured reports and sources in PostgreSQL, deliver short summaries to Slack, and review everything in a lightweight Next.js UI.
+Proof-of-concept **Competitor Analysis Agent**: maintain a list of competitors, pull recent **public** web/news-style updates via a search API, summarize them with an LLM, persist structured reports and search results in PostgreSQL, deliver short summaries to Slack, and review everything in a lightweight Next.js UI.
 
 ## Features
 
@@ -12,7 +12,7 @@ Proof-of-concept **Competitor Analysis Agent**: maintain a list of competitors, 
 - Daily automated scan via **Vercel Cron** (`GET /api/cron/daily-scan`)
 - Generate structured reports (title, summary, full markdown narrative)
 - Send aggregated summaries to Slack (Incoming Webhook)
-- Browse report history and per-report source lists
+- Browse report history and per-report search result lists
 - Poll analysis run status for manual runs
 
 ## Tech Stack
@@ -36,7 +36,7 @@ User → Next.js UI → Next.js Route Handlers → Prisma → PostgreSQL
 
 1. Competitors are stored in PostgreSQL (`Competitor` rows).
 2. A manual button hits `POST /api/analyze`, which inserts an `AnalysisRun` with status `queued`, schedules `runCompetitorAnalysisByRunId` using `after()`, and immediately returns `{ runId }`.
-3. For each competitor the agent calls `searchMarketUpdates`, then `generateCompetitorReport`, then persists a `Report` plus related `Source` rows.
+3. For each competitor the agent calls `searchMarketUpdates`, then `generateCompetitorReport`, then persists a `Report` plus related `SearchResult` rows.
 4. After all competitors finish, `sendSlackReport` posts concise summaries to Slack and marks participating reports as `sentToSlack`.
 5. The UI polls `GET /api/analysis-runs/[id]` until the run completes or fails, then refreshes server-rendered lists.
 
@@ -98,7 +98,7 @@ User → Next.js UI → Next.js Route Handlers → Prisma → PostgreSQL
 | ----- | ------ | -------------- |
 | `/api/competitors` | GET | List competitors |
 | `/api/competitors` | POST | Create competitor (validated body) |
-| `/api/reports` | GET | List reports with competitor + sources |
+| `/api/reports` | GET | List reports with competitor + search results |
 | `/api/analyze` | POST | Queue manual run + fire-and-forget execution |
 | `/api/analysis-runs/[id]` | GET | Poll run metadata (`queued`, `running`, `completed`, `failed`) |
 | `/api/cron/daily-scan` | GET | Authenticated cron entry point |
@@ -140,7 +140,7 @@ User → Next.js UI → Next.js Route Handlers → Prisma → PostgreSQL
 - Dedicated worker/queue with retries and dead-letter handling.
 - AuthZ, auditing, and per-workspace settings.
 - Rich observability (OpenTelemetry/Sentry) and structured logs.
-- Smarter deduping/caching of sources and incremental Slack digests.
+- Smarter deduping/caching of search results and incremental Slack digests.
 
 ## Submission checklist
 

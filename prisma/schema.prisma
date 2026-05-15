@@ -14,8 +14,8 @@ model Competitor {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  reports Report[]
-  sources Source[]
+  reports         Report[]
+  searchResults   SearchResult[]
 
   @@index([createdAt])
 }
@@ -31,18 +31,19 @@ model Report {
   competitorId String?
   competitor   Competitor? @relation(fields: [competitorId], references: [id])
 
-  sources Source[]
+  searchResults   SearchResult[]
 
   @@index([competitorId])
   @@index([createdAt])
 }
 
-model Source {
+model SearchResult {
   id          String    @id @default(cuid())
   title       String
   url         String
   snippet     String?
   publishedAt DateTime?
+  score       Float?
   createdAt   DateTime  @default(now())
 
   competitorId String?

@@ -9,12 +9,12 @@ describe("generateCompetitorReport", () => {
     process.env.OPENAI_API_KEY = originalKey;
   });
 
-  it("creates report structure from mock sources when no OpenAI key", async () => {
+  it("creates report structure from mock web search results when no OpenAI key", async () => {
     delete process.env.OPENAI_API_KEY;
 
     const result = await generateCompetitorReport({
       competitorName: "Acme",
-      sources: [
+      webSearchResults: [
         {
           title: "Acme launches billing",
           url: "https://example.com/a",

@@ -1,24 +1,12 @@
 import { getOptionalEnv } from "@/lib/env";
-import { SearchResult } from "./types";
+import { WebSearchResult , SearchInput, TavilySearchResponse } from "./types";
 
-type SearchInput = {
-  name: string;
-  website?: string | null;
-};
 
-type TavilySearchResponse = {
-  results?: Array<{
-    title?: string;
-    url?: string;
-    content?: string;
-    published_date?: string | null;
-  }>;
-};
 
 export async function searchMarketUpdates(
   input: SearchInput,
-): Promise<SearchResult[]> {
-  const query = `${input.name} latest news product updates funding partnerships | company website: ${input.website}`;
+): Promise<WebSearchResult[]> {
+  const query = `What are the latest market updates for ${input.name} website:${input.website}`;
 
   const apiKey = getOptionalEnv("SEARCH_API_KEY");
   if (!apiKey) {
@@ -30,6 +18,7 @@ export async function searchMarketUpdates(
         snippet:
           "Sample search result. Replace with real search API data by setting SEARCH_API_KEY.",
         publishedAt: new Date(),
+        score: null,
       },
     ];
   }
@@ -40,9 +29,10 @@ export async function searchMarketUpdates(
     body: JSON.stringify({
       api_key: apiKey,
       query,
-      search_depth: "advanced",
-      max_results: 8,
-      include_answer: false,
+      search_depth: "basic",
+      max_results: 4,
+      time_range: "day",
+      topic:"finance"
     }),
   });
 
@@ -62,5 +52,6 @@ export async function searchMarketUpdates(
       publishedAt: r.published_date
         ? new Date(r.published_date)
         : null,
+      score: r.score ?? null,
     }));
 }

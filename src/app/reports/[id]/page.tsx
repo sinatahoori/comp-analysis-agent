@@ -16,7 +16,7 @@ export default async function ReportDetailPage({ params }: Params) {
     where: { id },
     include: {
       competitor: true,
-      sources: { orderBy: { createdAt: "asc" } },
+      searchResults: { orderBy: { createdAt: "asc" } },
     },
   });
 
@@ -73,34 +73,37 @@ export default async function ReportDetailPage({ params }: Params) {
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-            Sources
+            Search results
           </h2>
-          {report.sources.length === 0 ? (
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">No sources saved.</p>
+          {report.searchResults.length === 0 ? (
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">No search results saved.</p>
           ) : (
             <ul className="space-y-3">
-              {report.sources.map((source) => (
+              {report.searchResults.map((searchResult) => (
                 <li
-                  key={source.id}
+                  key={searchResult.id}
                   className="rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950"
                 >
                   <a
-                    href={source.url}
+                    href={searchResult.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-medium text-emerald-700 hover:underline dark:text-emerald-400"
                   >
-                    {source.title}
+                    {searchResult.title}
                   </a>
-                  {source.snippet ? (
+                  {searchResult.snippet ? (
                     <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-                      {source.snippet}
+                      {searchResult.snippet}
                     </p>
                   ) : null}
                   <p className="mt-2 text-xs text-zinc-500">
-                    {source.publishedAt
-                      ? `Published ${new Date(source.publishedAt).toLocaleDateString()}`
+                    {searchResult.publishedAt
+                      ? `Published ${new Date(searchResult.publishedAt).toLocaleDateString()}`
                       : "Publication date unknown"}
+                    {typeof searchResult.score === "number"
+                      ? ` · Score ${searchResult.score.toFixed(2)}`
+                      : ""}
                   </p>
                 </li>
               ))}
